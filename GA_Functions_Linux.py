@@ -543,21 +543,24 @@ def initialize_population(population_size, network_shape, spacing, connectivity,
     # Load and assign respectively every imported network to a project 
     for i in range(population_size):
         if Extracted == 1:
-            proj [i] = op.utils.Workspace().load_project(filename=electrode_name)
-            # Assign the imported network to a project
+            proj[i] = op.utils.Workspace().load_project(filename=electrode_name)
             net[i] = proj[i].network
-            # Assign geometry to the imported network
-            geo[i] = proj[i]['geo_01']    
-        if Extracted == 0:
-            # Create a new project
-            proj[i] = ws.new_project(name='prj_' +str(i))
-            # Load the template
-            net[i] = op.network.Cubic(shape=network_shape, spacing=spacing, connectivity=connectivity, project=proj[i])  
-        if Extracted == 2:
-            # Load the Voronoi network:
+            geo[i] = proj[i]['geo_01']
+            # Assuming 'pore.internal' is already set for extracted networks, but if not, you'll need to set it here.
+        elif Extracted == 0:
+            proj[i] = ws.new_project(name='prj_' + str(i))
+            net[i] = op.network.Cubic(shape=network_shape, spacing=spacing, connectivity=connectivity, project=proj[i])
+            # For Cubic networks, explicitly define 'pore.internal' and 'throat.internal' if not already defined
+            if 'pore.internal' not in net[i].props():
+                net[i]['pore.internal'] = True  # Assuming all pores are internal initially
+                net[i]['throat.internal'] = True  # Assuming all throats are internal initially
+        elif Extracted == 2:
             proj[i] = op.utils.Workspace().load_project(filename='./Genetic_algorithm' + '/' + folder + '/Voronoi_initial')
-            net[i] = proj[i].network             
-            
+            net[i] = proj[i].network
+            # For Voronoi networks, you might also need to explicitly set 'pore.internal' and 'throat.internal'
+            if 'pore.internal' not in net[i].props():
+                net[i]['pore.internal'] = True  # Assuming all pores are internal initially
+                net[i]['throat.internal'] = True  # Assuming all throats are internal initially
         # Assign every key to a newly created project    
         if Extracted == 1:
             # Create boundary pores
@@ -1254,7 +1257,7 @@ def add_geometry_models(net, geo, throat_condition, spacing, Extracted):
         geo[i].add_model(propname='throat.cross_sectional_area', model=op.models.geometry.throat_area.cylinder, throat_diameter='throat.diameter')
         geo[i].add_model(propname='throat.conduit_lengths', model=op.models.geometry.throat_length.conduit_lengths, throat_endpoints='throat.endpoints', throat_length='throat.length')
         geo[i].add_model(propname='throat.area', model=op.models.geometry.throat_area.cylinder, throat_diameter='throat.diameter')       
-        geo[i].add_model(propname='pore.surface_area', model=op.models.geometry.pore_surface_area.sphere, pore_diameter='pore.diameter',throat_cross_sectional_area='throat.cross_sectional_area', throat_surface_area='throat.surface_area')
+        geo[i].add_model(propname='pore.surface_area', model=op.models.geometry.pore_surface_area.sphere, pore_diameter='pore.diameter',throat_cross_sectional_area='throat.cross_sectional_area')
          
         if Extracted == 0:
             geo[i]['pore.diameter'][net[i].pores('surface')] = 1/50 * spacing
@@ -1288,7 +1291,7 @@ def add_geometry_models_ref(net, geo, throat_condition, spacing, Extracted):
     geo.add_model(propname='throat.cross_sectional_area', model=op.models.geometry.throat_area.cylinder, throat_diameter='throat.diameter')
     geo.add_model(propname='throat.conduit_lengths', model=op.models.geometry.throat_length.conduit_lengths, throat_endpoints='throat.endpoints', throat_length='throat.length')
     geo.add_model(propname='throat.area', model=op.models.geometry.throat_area.cylinder, throat_diameter='throat.diameter')       
-    geo.add_model(propname='pore.surface_area', model=op.models.geometry.pore_surface_area.sphere, pore_diameter='pore.diameter',throat_cross_sectional_area='throat.cross_sectional_area', throat_surface_area='throat.surface_area')
+    geo.add_model(propname='pore.surface_area', model=op.models.geometry.pore_surface_area.sphere, pore_diameter='pore.diameter',throat_cross_sectional_area='throat.cross_sectional_area')
      
     if Extracted == 0:
         geo['pore.diameter'][net.pores('surface')] = 1/50 * spacing

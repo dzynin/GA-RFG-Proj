@@ -13,6 +13,20 @@ import GA_Functions_Linux as func
 from multiprocessing import Pool
 op.Workspace().clear()
 
+# folder='results'
+# folder_path = os.path.dirname('./Genetic_algorithm' + '/' + folder + '/j0_1_reference_network')
+# if not os.path.exists(folder_path):
+#     os.makedirs(folder_path)
+folder_path = os.path.join(os.getcwd(), 'Genetic_algorithm','GA-2','Reference')
+
+# Create the directory if it does not exist
+if not os.path.exists(folder_path):
+    os.makedirs(folder_path)
+    print(f"Directory created: {folder_path}")
+else:
+    print(f"Directory already exists: {folder_path}")
+
+
 ''' The main function to run the genetic algorithm:''' 
 # Parameters of the Genetic algorithm:
 population_size = 50               # Number of initially mutated parents 
